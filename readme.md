@@ -108,10 +108,6 @@ Ejemplo de creación:
 
 ---
 
-## 📸 Capturas (opcional)
-
----
-
 ## 👨‍💻 Autor
 
 Proyecto creado por **Lucas Gallo** 🇦🇷  
