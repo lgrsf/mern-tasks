@@ -1,79 +1,48 @@
 import React, { useState } from "react";
 
-function TaskItem({ task, toggleTask, removeTask, renameTask }) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedTitle, setEditedTitle] = useState(task.title);
+function TaskItem({ task, updateTask, removeTask }) {
+    const [title, setTitle] = useState(task.title);
 
-    const handleEdit = () => {
-        if (isEditing) {
-            renameTask(task._id, editedTitle); // guardamos cambios
-        }
-        setIsEditing(!isEditing);
+    const handleChangeTitle = async () => {
+        if (title.trim() === "") return;
+        await updateTask(task._id, "title", title);
+    };
+
+    const handleChangeStatus = async (e) => {
+        await updateTask(task._id, "status", e.target.value);
+    };
+
+    const handleChangeDueDate = async (e) => {
+        await updateTask(task._id, "dueDate", e.target.value);
     };
 
     return (
-        <li
-            style={{
-                marginBottom: "0.5rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.5rem",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                background: task.completed ? "#d4edda" : "#fff",
-            }}
-        >
-            {/* Texto o input según si estamos editando */}
-            {isEditing ? (
-                <input
-                    type="text"
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    style={{ flex: 1, marginRight: "0.5rem" }}
-                />
-            ) : (
-                <span
-                    onClick={() => toggleTask(task._id)}
-                    style={{
-                        textDecoration: task.completed ? "line-through" : "none",
-                        cursor: "pointer",
-                        flex: 1,
-                    }}
-                >
-                    {task.title}
-                </span>
-            )}
+        <div style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px", borderRadius: "5px", display: "flex", flexDirection: "column" }}>
+            <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={handleChangeTitle}
+                style={{ fontSize: "16px", marginBottom: "5px" }}
+            />
 
-            {/* Botones Editar y Borrar */}
-            <button
-                onClick={handleEdit}
-                style={{
-                    marginRight: "0.5rem",
-                    background: "#ffa500",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    padding: "0.3rem 0.6rem",
-                    cursor: "pointer",
-                }}
-            >
-                {isEditing ? "Guardar" : "Editar"}
+            <select value={task.status} onChange={handleChangeStatus} style={{ marginBottom: "5px" }}>
+                <option value="pendiente">Pendiente</option>
+                <option value="en curso">En curso</option>
+                <option value="completada">Completada</option>
+            </select>
+
+            <input
+                type="datetime-local"
+                value={task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""}
+                onChange={handleChangeDueDate}
+                style={{ marginBottom: "5px" }}
+            />
+
+            <button onClick={() => removeTask(task._id)} style={{ backgroundColor: "#e53935", color: "white", border: "none", padding: "5px 10px", borderRadius: "3px", cursor: "pointer" }}>
+                Eliminar
             </button>
-            <button
-                onClick={() => removeTask(task._id)}
-                style={{
-                    background: "#ff6b6b",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    padding: "0.3rem 0.6rem",
-                    cursor: "pointer",
-                }}
-            >
-                Borrar
-            </button>
-        </li>
+        </div>
     );
 }
 
