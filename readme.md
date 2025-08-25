@@ -40,35 +40,39 @@ mern-tasks/
 ```bash
 git clone https://github.com/usuario/mern-tasks.git
 cd mern-tasks
-```bash
+```
 
 ### 2. Configurar el Backend
+
 ```bash
 cd backend
 npm install
-```bash
+```
 
 Crear archivo **.env**:
+
 ```env
 MONGO_URI=mongodb://localhost:27017/mern_tasks
 PORT=5000
-```bash
+```
 
 Iniciar servidor:
+
 ```bash
 npm run dev
-```bash
+```
 
 Backend disponible en 👉 `http://localhost:5000`
 
 ---
 
 ### 3. Configurar el Frontend
+
 ```bash
 cd ../frontend
 npm install
 npm run dev
-```bash
+```
 
 Frontend disponible en 👉 `http://localhost:5173`
 
@@ -84,6 +88,7 @@ Frontend disponible en 👉 `http://localhost:5173`
 - **DELETE /:id** → Eliminar tarea  
 
 Ejemplo de creación:
+
 ```json
 {
   "title": "Aprender MERN",
