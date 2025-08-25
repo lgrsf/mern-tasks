@@ -1,57 +1,78 @@
 import React, { useState } from "react";
 
-function TaskItem({ task, toggleTask, renameTask, removeTask }) {
-    const [editing, setEditing] = useState(false);
-    const [title, setTitle] = useState(task.title);
+function TaskItem({ task, toggleTask, removeTask, renameTask }) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedTitle, setEditedTitle] = useState(task.title);
 
-    const handleRename = () => {
-        renameTask(task, title);
-        setEditing(false);
-    };
-
-    // Función para formatear fecha y hora
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleString(); // "dd/mm/yyyy, hh:mm:ss"
+    const handleEdit = () => {
+        if (isEditing) {
+            renameTask(task._id, editedTitle); // guardamos cambios
+        }
+        setIsEditing(!isEditing);
     };
 
     return (
-        <li style={{ marginBottom: "0.5rem" }}>
-            <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={() => toggleTask(task)}
-            />
-            {editing ? (
-                <>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                    />
-                    <button onClick={handleRename}>Guardar</button>
-                </>
+        <li
+            style={{
+                marginBottom: "0.5rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0.5rem",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                background: task.completed ? "#d4edda" : "#fff",
+            }}
+        >
+            {/* Texto o input según si estamos editando */}
+            {isEditing ? (
+                <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    style={{ flex: 1, marginRight: "0.5rem" }}
+                />
             ) : (
-                <>
-                    <span
-                        style={{
-                            textDecoration: task.completed ? "line-through" : "none",
-                            marginLeft: "0.5rem"
-                        }}
-                    >
-                        {task.title}
-                    </span>
-                    <span style={{ marginLeft: "1rem", fontSize: "0.8rem", color: "#555" }}>
-                        Creada: {formatDate(task.createdAt)} | Actualizada: {formatDate(task.updatedAt)}
-                    </span>
-                    <button onClick={() => setEditing(true)} style={{ marginLeft: "0.5rem" }}>
-                        Editar
-                    </button>
-                    <button onClick={() => removeTask(task)} style={{ marginLeft: "0.5rem" }}>
-                        Borrar
-                    </button>
-                </>
+                <span
+                    onClick={() => toggleTask(task._id)}
+                    style={{
+                        textDecoration: task.completed ? "line-through" : "none",
+                        cursor: "pointer",
+                        flex: 1,
+                    }}
+                >
+                    {task.title}
+                </span>
             )}
+
+            {/* Botones Editar y Borrar */}
+            <button
+                onClick={handleEdit}
+                style={{
+                    marginRight: "0.5rem",
+                    background: "#ffa500",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    padding: "0.3rem 0.6rem",
+                    cursor: "pointer",
+                }}
+            >
+                {isEditing ? "Guardar" : "Editar"}
+            </button>
+            <button
+                onClick={() => removeTask(task._id)}
+                style={{
+                    background: "#ff6b6b",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    padding: "0.3rem 0.6rem",
+                    cursor: "pointer",
+                }}
+            >
+                Borrar
+            </button>
         </li>
     );
 }
