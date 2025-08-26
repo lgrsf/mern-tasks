@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import TaskItem from "./TaskItem.jsx";
+import TaskCalendar from "./TaskCalendar.jsx";
 
 function TaskList() {
     const [tasks, setTasks] = useState([]);
@@ -18,95 +20,67 @@ function TaskList() {
         }
     };
 
-    const handleAddTask = async (e) => {
+    const addTask = async (e) => {
         e.preventDefault();
         if (!newTask) return;
         try {
             const res = await axios.post("http://localhost:5000/api/tasks", {
                 title: newTask,
-                status: "pendiente",
-                completed: false
+                status: "Pendiente",
+                dueDate: null,
             });
             setTasks([...tasks, res.data]);
             setNewTask("");
         } catch (err) {
-            console.error("Error al crear tarea:", err);
+            console.error("Error al agregar tarea:", err);
         }
     };
 
-    const handleUpdateTask = async (id, field, value) => {
+    const updateTask = async (id, field, value) => {
         try {
-            const res = await axios.put(`http://localhost:5000/api/tasks/${id}`, {
-                [field]: value
-            });
-            setTasks(tasks.map(t => (t._id === id ? res.data : t)));
+            const res = await axios.put(`http://localhost:5000/api/tasks/${id}`, { [field]: value });
+            setTasks(tasks.map(task => (task._id === id ? res.data : task)));
         } catch (err) {
             console.error("Error al actualizar tarea:", err);
         }
     };
 
-    const handleDeleteTask = async (id) => {
+    const deleteTask = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/api/tasks/${id}`);
-            setTasks(tasks.filter(t => t._id !== id));
+            setTasks(tasks.filter(task => task._id !== id));
         } catch (err) {
             console.error("Error al eliminar tarea:", err);
         }
     };
 
     return (
-        <div style={{ maxWidth: "800px", margin: "20px auto" }}>
-            <h2>Mis Tareas</h2>
-
-            <form onSubmit={handleAddTask} style={{ marginBottom: "20px" }}>
+        <div className="max-w-3xl mx-auto">
+            <form onSubmit={addTask} className="flex mb-4">
                 <input
                     type="text"
+                    placeholder="Nueva tarea"
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
-                    placeholder="Nueva tarea..."
-                    style={{ padding: "5px", width: "70%" }}
+                    className="flex-1 p-2 border rounded-l"
                 />
-                <button type="submit" style={{ padding: "5px 10px", marginLeft: "10px" }}>Agregar</button>
+                <button type="submit" className="p-2 bg-blue-600 text-white rounded-r">Agregar</button>
             </form>
 
-            {tasks.length === 0 ? <p>No hay tareas todavía.</p> : (
-                tasks.map(task => (
-                    <div key={task._id} style={{
-                        border: "1px solid #ccc",
-                        borderRadius: "5px",
-                        padding: "10px",
-                        marginBottom: "10px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center"
-                    }}>
-                        <div>
-                            <input
-                                type="text"
-                                value={task.title}
-                                onChange={(e) => handleUpdateTask(task._id, "title", e.target.value)}
-                                style={{ fontSize: "16px", width: "100%" }}
-                            />
-                            <select
-                                value={task.status}
-                                onChange={(e) => handleUpdateTask(task._id, "status", e.target.value)}
-                                style={{ marginTop: "5px" }}
-                            >
-                                <option value="pendiente">Pendiente</option>
-                                <option value="en curso">En curso</option>
-                                <option value="completada">Completada</option>
-                            </select>
-                            <input
-                                type="datetime-local"
-                                value={task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""}
-                                onChange={(e) => handleUpdateTask(task._id, "dueDate", e.target.value)}
-                                style={{ marginTop: "5px" }}
-                            />
-                        </div>
-                        <button onClick={() => handleDeleteTask(task._id)} style={{ marginLeft: "10px", color: "red" }}>Borrar</button>
-                    </div>
-                ))
-            )}
+            <div className="mb-6">
+                <TaskCalendar tasks={tasks} />
+            </div>
+
+            <div className="space-y-2">
+                {tasks.map(task => (
+                    <TaskItem
+                        key={task._id}
+                        task={task}
+                        updateTask={updateTask}
+                        deleteTask={deleteTask}
+                    />
+                ))}
+            </div>
         </div>
     );
 }

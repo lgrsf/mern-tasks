@@ -1,46 +1,44 @@
-import React, { useState } from "react";
+import React from "react";
 
-function TaskItem({ task, updateTask, removeTask }) {
-    const [title, setTitle] = useState(task.title);
-
-    const handleChangeTitle = async () => {
-        if (title.trim() === "") return;
-        await updateTask(task._id, "title", title);
-    };
-
-    const handleChangeStatus = async (e) => {
-        await updateTask(task._id, "status", e.target.value);
-    };
-
-    const handleChangeDueDate = async (e) => {
-        await updateTask(task._id, "dueDate", e.target.value);
+function TaskItem({ task, updateTask, deleteTask }) {
+    const handleChange = (field, value) => {
+        updateTask(task._id, field, value);
     };
 
     return (
-        <div style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px", borderRadius: "5px", display: "flex", flexDirection: "column" }}>
-            <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onBlur={handleChangeTitle}
-                style={{ fontSize: "16px", marginBottom: "5px" }}
-            />
+        <div className="flex justify-between items-center p-2 border rounded bg-white">
+            <div className="flex-1">
+                <input
+                    type="text"
+                    value={task.title}
+                    onChange={(e) => handleChange("title", e.target.value)}
+                    className="w-full border-b mb-1"
+                />
+                <div className="flex items-center space-x-2">
+                    <select
+                        value={task.status}
+                        onChange={(e) => handleChange("status", e.target.value)}
+                        className="border px-1 rounded"
+                    >
+                        <option>Pendiente</option>
+                        <option>En curso</option>
+                        <option>Completada</option>
+                    </select>
 
-            <select value={task.status} onChange={handleChangeStatus} style={{ marginBottom: "5px" }}>
-                <option value="pendiente">Pendiente</option>
-                <option value="en curso">En curso</option>
-                <option value="completada">Completada</option>
-            </select>
+                    <input
+                        type="datetime-local"
+                        value={task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""}
+                        onChange={(e) => handleChange("dueDate", e.target.value)}
+                        className="border px-1 rounded"
+                    />
+                </div>
+            </div>
 
-            <input
-                type="datetime-local"
-                value={task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""}
-                onChange={handleChangeDueDate}
-                style={{ marginBottom: "5px" }}
-            />
-
-            <button onClick={() => removeTask(task._id)} style={{ backgroundColor: "#e53935", color: "white", border: "none", padding: "5px 10px", borderRadius: "3px", cursor: "pointer" }}>
-                Eliminar
+            <button
+                onClick={() => deleteTask(task._id)}
+                className="ml-2 px-2 py-1 bg-red-600 text-white rounded"
+            >
+                Borrar
             </button>
         </div>
     );

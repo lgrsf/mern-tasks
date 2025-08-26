@@ -1,70 +1,56 @@
 import React, { useState, useEffect } from "react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
-import axios from "axios";
 
-function TaskCalendar() {
-    const [tasks, setTasks] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+function TaskCalendar({ tasks = [] }) {
+    const [currentMonth, setCurrentMonth] = useState(new Date());
 
-    useEffect(() => {
-        fetchTasks();
-    }, []);
+    // Agrupar tareas por día
+    const tasksByDay = tasks.reduce((acc, task) => {
+        if (!task.dueDate) return acc;
+        const dateKey = new Date(task.dueDate).toDateString();
+        if (!acc[dateKey]) acc[dateKey] = [];
+        acc[dateKey].push(task);
+        return acc;
+    }, {});
 
-    const fetchTasks = async () => {
-        try {
-            const res = await axios.get("http://localhost:5000/api/tasks");
-            setTasks(res.data);
-        } catch (err) {
-            console.error("Error al obtener tareas:", err);
-        }
-    };
+    // Generar días del mes actual
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysArray = [];
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+        const date = new Date(year, month, i);
+        daysArray.push(date);
+    }
 
-    const daysInMonth = eachDayOfInterval({
-        start: startOfMonth(selectedDate),
-        end: endOfMonth(selectedDate)
-    });
-
-    const tasksByDate = (date) => {
-        return tasks.filter(task => task.dueDate && isSameDay(parseISO(task.dueDate), date));
-    };
+    const prevMonth = () => setCurrentMonth(new Date(year, month - 1, 1));
+    const nextMonth = () => setCurrentMonth(new Date(year, month + 1, 1));
 
     return (
-        <div style={{ maxWidth: "800px", margin: "20px auto", textAlign: "center" }}>
-            <h2>Calendario de Tareas</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px", marginTop: "20px" }}>
-                {daysInMonth.map(day => {
-                    const dayTasks = tasksByDate(day);
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <button onClick={prevMonth} className="px-4 py-2 bg-gray-300 rounded">←</button>
+                <h2 className="text-xl font-bold">
+                    {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
+                </h2>
+                <button onClick={nextMonth} className="px-4 py-2 bg-gray-300 rounded">→</button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-2">
+                {daysArray.map((day) => {
+                    const dayTasks = tasksByDay[day.toDateString()] || [];
                     return (
                         <div
                             key={day}
-                            onClick={() => setSelectedDate(day)}
-                            style={{
-                                padding: "10px",
-                                borderRadius: "5px",
-                                cursor: "pointer",
-                                backgroundColor: dayTasks.length > 0 ? "#1976d2" : "#f0f0f0",
-                                color: dayTasks.length > 0 ? "white" : "black"
-                            }}
+                            className={`p-2 border rounded text-center ${dayTasks.length > 0 ? "bg-yellow-200" : "bg-white"}`}
                         >
-                            {format(day, "d")}
+                            {day.getDate()}
+                            {dayTasks.length > 0 && (
+                                <div className="text-xs mt-1">{dayTasks.length} tarea{dayTasks.length > 1 ? "s" : ""}</div>
+                            )}
                         </div>
                     );
                 })}
-            </div>
-
-            <div style={{ marginTop: "20px", textAlign: "left" }}>
-                <h3>Tareas del {format(selectedDate, "dd/MM/yyyy")}</h3>
-                {tasksByDate(selectedDate).length === 0 ? (
-                    <p>No hay tareas para este día.</p>
-                ) : (
-                    tasksByDate(selectedDate).map(task => (
-                        <div key={task._id} style={{ border: "1px solid #ccc", borderRadius: "5px", padding: "10px", marginBottom: "5px" }}>
-                            <strong>{task.title}</strong><br />
-                            Estado: {task.status}<br />
-                            Fecha/Hora: {task.dueDate ? format(parseISO(task.dueDate), "HH:mm dd/MM/yyyy") : "Sin definir"}
-                        </div>
-                    ))
-                )}
             </div>
         </div>
     );
